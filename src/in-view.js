@@ -20,19 +20,18 @@ const inView = () => {
     const triggers = ['scroll', 'resize', 'load'];
 
     /**
-    * Maintain a hashmap of all registries, a history
-    * of selectors to enumerate, and an options object.
+    * Maintain a list of all registries and a default options object.
     */
-    let selectors = { history: [] };
-    let options   = { offset: {}, threshold: 0, test: inViewport };
+    const register = [];
+    const options  = { offset: {}, threshold: 0, test: inViewport };
 
     /**
     * Check each registry from selector history,
     * throttled to interval.
     */
     const check = throttle(() => {
-        selectors.history.forEach(selector => {
-            selectors[selector].check();
+        register.forEach(registry => {
+            registry.check();
         });
     }, interval);
 
@@ -53,28 +52,13 @@ const inView = () => {
     }
 
     /**
-    * The main interface. Take a selector and retrieve
-    * the associated registry or create a new one.
+    * The main interface. Take a selector string, or list
+    * of nodes and return a new registry.
     */
-    let control = (selector) => {
-
-        if (typeof selector !== 'string') return;
-
-        // Get an up-to-date list of elements.
-        let elements = [].slice.call(document.querySelectorAll(selector));
-
-        // If the registry exists, update the elements.
-        if (selectors.history.indexOf(selector) > -1) {
-            selectors[selector].elements = elements;
-        }
-
-        // If it doesn't exist, create a new registry.
-        else {
-            selectors[selector] = Registry(elements, options);
-            selectors.history.push(selector);
-        }
-
-        return selectors[selector];
+    const control = (selection) => {
+        const registry = Registry(getElements(selection), options);
+        register.push(registry);
+        return registry;
     };
 
     /**
@@ -120,6 +104,16 @@ const inView = () => {
     return control;
 
 };
+
+function getElements(obj) {
+    if (typeof obj === 'string')
+        return [].slice.call(document.querySelectorAll(obj));
+    if ([NodeList, HTMLCollection].some(collection => obj instanceof collection))
+        return [].slice.call(obj);
+    if (obj.nodeType)
+        return [obj];
+    throw new TypeError('Expected a selector string or list of nodes.');
+}
 
 // Export a singleton.
 export default inView();
