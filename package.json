@@ -7,14 +7,15 @@
   "scripts": {
     "start": "NODE_ENV=production webpack -wp",
     "build": "NODE_ENV=production webpack -p",
-    "prepublish": "npm run -s test",
+    "prepublish": "npm run snyk-protect; npm run -s test",
     "lint": "eslint src/**/*.js",
     "pretest": "npm run -s lint",
     "test": "ava -v",
     "docs": "npm run -s docs-server & npm run -s docs-js & npm run -s docs-css",
     "docs-server": "http-server ./docs -o",
     "docs-js": "NODE_ENV=production webpack -wp --config ./docs/docs.webpack.config.js",
-    "docs-css": "node-sass -w --output-style=compressed ./docs/lib/css/main.scss ./docs/lib/css/main.min.css"
+    "docs-css": "node-sass -w --output-style=compressed ./docs/lib/css/main.scss ./docs/lib/css/main.min.css",
+    "snyk-protect": "snyk protect"
   },
   "ava": {
     "files": [
@@ -63,6 +64,8 @@
     "webpack": "^1.13.2"
   },
   "dependencies": {
-    "lodash": "^4.15.0"
-  }
+    "lodash": "^4.15.0",
+    "snyk": "^1.189.0"
+  },
+  "snyk": true
 }
